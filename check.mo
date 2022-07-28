@@ -2,21 +2,24 @@
 import HashMap "mo:base/HashMap";
 import Principal "mo:base/Principal";
 import Cycles "mo:base/ExperimentalCycles";
-actor{
-    public func balance() : async Nat {
-        return(Cycles.balance())
-    };
-    public func message_available() : async Nat {
-        return(Cycles.available())
-    };
-    
-    public func transfer(amount : Nat) : async Nat{
-      Cycles.accept(amount);
+
+
+
+
+shared actor class myCanister(){
+    public type MyCanisterInterface = actor {
+  transferCycles: shared (Nat, Principal) -> async (Bool);
+  acceptCycles: shared() -> async (Bool);
+};
+    // Challenge 6 - In progress
+    public func transfer(amount : Nat, to: Principal) : async Bool{
+      if(amount < Cycles.balance()) {
+        Cycles.add(amount);
+        let canister : MyCanisterInterface = actor (Principal.toText(to));
+        return await canister.acceptCycles();
+      };
+      return false;
     };
 
-    public func add(amount : Nat) : async Nat{
-      Cycles.add(amount);
-      return(amount);
-    };
-
+  
 }   
